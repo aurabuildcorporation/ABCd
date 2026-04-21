@@ -1,0 +1,12 @@
+{
+  "name": "aic-intelligence-suite-v2",
+  "version": "2.0.0",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "dotenv": "^16.0.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

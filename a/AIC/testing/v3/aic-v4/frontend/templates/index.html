@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">AIC‑V3 Entity Scoring</h2>
+
+<div class="card p-4 shadow-sm">
+    <form id="scoreForm">
+        <label class="form-label">Entity Name</label>
+        <input type="text" id="entityInput" class="form-control" placeholder="e.g. Starbucks, Tesla, Premium Coffee">
+        <button class="btn btn-primary mt-3">Score Entity</button>
+    </form>
+
+    <div id="scoreResult" class="mt-4"></div>
+</div>
+{% endblock %}

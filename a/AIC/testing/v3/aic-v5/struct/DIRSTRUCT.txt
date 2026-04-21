@@ -1,0 +1,75 @@
+aic-v3/
+│
+├── app.py
+├── requirements.txt
+├── package.json
+├── README.md
+│
+├── config/
+│   ├── settings.py
+│   ├── logging.conf
+│   └── yelp_config.py
+│
+├── db/
+│   ├── schema.sql
+│   ├── init_db.py
+│   ├── db.py
+│   └── migrations/
+│       └── 001_initial.sql
+│
+├── engine/
+│   ├── server.js
+│   ├── scoring/
+│   │   ├── embeddings.js
+│   │   ├── sentiment.js
+│   │   ├── heuristics.js
+│   │   ├── volatility.js
+│   │   ├── fusion.js
+│   │   └── yelp_enrichment.js
+│   ├── utils/
+│   │   ├── logger.js
+│   │   └── http.js
+│   └── package.json
+│
+├── workers/
+│   ├── run_interval.py
+│   ├── anomaly_detector.py
+│   ├── trend_tracker.py
+│   ├── forecast_worker.py
+│   └── utils/
+│       ├── db_access.py
+│       └── scoring_client.py
+│
+├── frontend/
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── styles.css
+│   │   ├── js/
+│   │   │   ├── charts.js
+│   │   │   └── ui.js
+│   │   └── img/
+│   │       └── logo.png
+│   │
+│   └── templates/
+│       ├── base.html
+│       ├── index.html
+│       ├── entity.html
+│       ├── history.html
+│       ├── admin.html
+│       └── components/
+│           ├── navbar.html
+│           ├── score_card.html
+│           └── chart_block.html
+│
+├── scripts/
+│   ├── run_flask.sh
+│   ├── run_node.sh
+│   ├── run_workers.sh
+│   ├── dev_all.sh
+│   └── push_to_repo.sh
+│
+└── tests/
+    ├── test_scoring.py
+    ├── test_api.py
+    ├── test_workers.py
+    └── test_db.py

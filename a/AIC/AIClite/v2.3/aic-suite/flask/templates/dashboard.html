@@ -1,0 +1,54 @@
+
+<html>
+<head>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+body{background:#0b0f14;color:#0ff;font-family:monospace}
+.card{background:#111;padding:10px;margin:10px}
+a{color:#0ff}
+</style>
+</head>
+<body>
+
+<h2>AIC UI V3 EXPORT</h2>
+
+<input id="q"/>
+<button onclick="send()">run</button>
+
+<div id="out"></div>
+
+<div class="card">
+<h3>Watchlist</h3>
+<div id="wl"></div>
+</div>
+
+<div class="card">
+<h3>EXPORT</h3>
+<a href="/export/csv">CSV</a><br>
+<a href="/export/json">JSON</a><br>
+<a href="/export/txt">TXT</a>
+</div>
+
+<script>
+const s=io();
+
+function send(){
+ s.emit("query",{q:document.getElementById("q").value});
+}
+
+s.on("result",d=>{
+ document.getElementById("out").innerHTML =
+ JSON.stringify(d,null,2);
+});
+
+s.on("watchlist_update",d=>{
+ let w=document.getElementById("wl");
+ w.innerHTML="";
+ d.forEach(x=>{
+  w.innerHTML+=`<div class='card'>${x.entity} ${x.score} ${x.trend}</div>`;
+ });
+});
+</script>
+
+</body>
+</html>
