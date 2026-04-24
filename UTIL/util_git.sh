@@ -1,69 +1,160 @@
 #!/bin/bash
 
+# =====================================================
+# UTIL_GIT_PRO v2 - Interactive Git Automation Tool
+# =====================================================
+
 # -----------------------------
-# SAFETY CHECK FUNCTION
+# CONFIG
+# -----------------------------
+GIT_BRANCH=$(git branch --show-current 2>/dev/null)
+
+# -----------------------------
+# SAFETY CHECK: INSIDE GIT REPO
+# -----------------------------
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "ERROR: Not inside a git repository"
+    exit 1
+fi
+
+# -----------------------------
+# CLEAN CHECK FUNCTION
 # -----------------------------
 is_clean() {
     [ -z "$(git status --porcelain)" ]
 }
 
 # -----------------------------
-# GIT STATUS
+# HEADER
+# -----------------------------
+echo "======================================"
+echo "       UTIL_GIT_PRO v2"
+echo "   Branch: $GIT_BRANCH"
+echo "======================================"
+
+# -----------------------------
+# STATUS
 # -----------------------------
 while true; do
-    read -p "git status? (y/n): " answer
+    read -p "Show git status? (y/n): " answer
     case "$answer" in
-        [yY]* ) git status; break ;;
-        [nN]* ) break ;;
-        * ) echo "Please answer y or n." ;;
+        [yY]*)
+            git status
+            break
+            ;;
+        [nN]*)
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
     esac
 done
 
 # -----------------------------
-# GIT LOG
+# LOG
 # -----------------------------
 while true; do
-    read -p "git log? (y/n): " answer
+    read -p "Show git log? (y/n): " answer
     case "$answer" in
-        [yY]* ) git log --oneline --graph --decorate; break ;;
-        [nN]* ) break ;;
-        * ) echo "Please answer y or n." ;;
+        [yY]*)
+            git log --oneline --graph --decorate -10
+            break
+            ;;
+        [nN]*)
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
     esac
 done
 
 # -----------------------------
-# GIT ADD
+# ADD
 # -----------------------------
 while true; do
     read -p "git add . ? (y/n): " answer
     case "$answer" in
-        [yY]* ) git add .; break ;;
-        [nN]* ) break ;;
-        * ) echo "Please answer y or n." ;;
+        [yY]*)
+            git add .
+            echo "Staged changes."
+            break
+            ;;
+        [nN]*)
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
     esac
 done
 
 # -----------------------------
-# GIT COMMIT
+# COMMIT
 # -----------------------------
 while true; do
-    read -p "Commit Changes? (y/n): " answer
+    read -p "Commit changes? (y/n): " answer
     case "$answer" in
-        [yY]* ) git commit -m "$(date +%s)"; break ;;
-        [nN]* ) break ;;
-        * ) echo "Please answer y or n." ;;
+        [yY]*)
+            read -p "Enter commit message (leave blank for timestamp): " msg
+
+            if [ -z "$msg" ]; then
+                msg="$(date +%s)"
+            fi
+
+            git commit -m "$msg"
+            break
+            ;;
+        [nN]*)
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
     esac
 done
 
 # -----------------------------
-# FINAL LOG
+# PUSH
 # -----------------------------
 while true; do
-    read -p "git log? (y/n): " answer
+    read -p "Push to GitHub? (y/n): " answer
     case "$answer" in
-        [yY]* ) git log --oneline --graph --decorate; break ;;
-        [nN]* ) break ;;
-        * ) echo "Please answer y or n." ;;
+        [yY]*)
+            if [ -z "$GIT_BRANCH" ]; then
+                echo "No branch detected."
+            else
+                git push -u origin "$GIT_BRANCH"
+            fi
+            break
+            ;;
+        [nN]*)
+            echo "Skipping push"
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
+    esac
+done
+
+# -----------------------------
+# PULL / REBASE SAFETY
+# -----------------------------
+while true; do
+    read -p "Pull latest from origin? (y/n): " answer
+    case "$answer" in
+        [yY]*)
+            git pull --rebase
+            break
+            ;;
+        [nN]*)
+            break
+            ;;
+        *)
+            echo "Please answer y or n."
+            ;;
     esac
 done
 
@@ -71,18 +162,32 @@ done
 # SAFE REBASE (ONLY IF CLEAN)
 # -----------------------------
 if ! is_clean; then
-    echo "Working tree is NOT clean."
-    echo "Rebase blocked for safety."
+    echo "Working tree NOT clean. Rebase blocked."
     git status --short
 else
     while true; do
-        read -p "git rebase? (y/n): " answer
+        read -p "Run git rebase? (y/n): " answer
         case "$answer" in
-            [yY]* ) git rebase; break ;;
-            [nN]* ) echo "Skipping rebase"; break ;;
-            * ) echo "Please answer y or n." ;;
+            [yY]*)
+                git rebase
+                break
+                ;;
+            [nN]*)
+                echo "Skipping rebase"
+                break
+                ;;
+            *)
+                echo "Please answer y or n."
+                ;;
         esac
     done
 fi
 
-echo "git sequence complete"
+# -----------------------------
+# CLEAN SUMMARY
+# -----------------------------
+echo "--------------------------------------"
+echo "Git sequence complete"
+echo "Branch: $GIT_BRANCH"
+echo "Clean: $(is_clean && echo YES || echo NO)"
+echo "--------------------------------------"
