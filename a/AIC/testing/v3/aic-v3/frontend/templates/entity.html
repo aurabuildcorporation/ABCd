@@ -7,6 +7,23 @@
     <div class="col-md-4">
         {% include 'components/score_card.html' %}
     </div>
+    
+    <div class="card my-4">
+  <div class="card-body text-center">
+    <h5 class="card-title">Artificial Intelligence Credit Score</h5>
+    <h1 class="display-4">
+      {{ history[0]['aic_score'] if history else '—' }}
+    </h1>
+    <p class="lead">
+      {{ history[0]['rating'] if history else 'No rating yet' }}
+    </p>
+    {% if history %}
+    <p class="text-muted">
+      Confidence: {{ '%.0f' % (history[0]['confidence'] * 100) }}%
+    </p>
+    {% endif %}
+  </div>
+</div>
 
     <div class="col-md-8">
         {% include 'components/chart_block.html' %}

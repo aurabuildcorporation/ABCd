@@ -17,18 +17,19 @@ def get_db():
 def index():
     return render_template("index.html")
 
-
-@app.route("/entity/<entity_id>")
-def entity_page(entity_id):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM entities WHERE id = ?", (entity_id,))
-    entity = cur.fetchone()
-
-    cur.execute("SELECT * FROM scores WHERE entity_id = ? ORDER BY timestamp DESC LIMIT 50", (entity_id,))
-    history = cur.fetchall()
-
-    return render_template("entity.html", entity=entity, history=history)
+def classify_aic(score: int) -> str:
+    if score >= 900:
+        return "Transcendent"
+    elif score >= 800:
+        return "Elite"
+    elif score >= 700:
+        return "Excellent"
+    elif score >= 600:
+        return "Competent"
+    elif score >= 400:
+        return "Developing"
+    else:
+        return "Unstable"
 
 
 @app.route("/api/score", methods=["POST"])
@@ -45,16 +46,51 @@ def score_entity():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+    normalized = result.get("normalized_score", 0.0)
+    components = result.get("components", {})
+    confidence = result.get("confidence", 0.0)
+
+    aic_score = int(max(0, min(1000, 1000 * normalized)))
+    rating = classify_aic(aic_score)
+
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO scores (entity_name, score, confidence, timestamp) VALUES (?, ?, ?, datetime('now'))",
-        (entity_name, result["score"], result["confidence"])
+        """
+        INSERT INTO scores (
+            entity_name,
+            aic_score,
+            rating,
+            semantic_intelligence,
+            cultural_momentum,
+            external_credibility,
+            sentiment_stability,
+            system_confidence,
+            confidence,
+            timestamp
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        """,
+        (
+            entity_name,
+            aic_score,
+            rating,
+            components.get("semantic_intelligence"),
+            components.get("cultural_momentum"),
+            components.get("external_credibility"),
+            components.get("sentiment_stability"),
+            components.get("system_confidence"),
+            confidence,
+        ),
     )
     conn.commit()
 
-    return jsonify(result)
-
+    return jsonify({
+        "entity": entity_name,
+        "aic_score": aic_score,
+        "rating": rating,
+        "components": components,
+        "confidence": confidence
+    })
 
 @app.route("/history/<entity>")
 def history(entity):

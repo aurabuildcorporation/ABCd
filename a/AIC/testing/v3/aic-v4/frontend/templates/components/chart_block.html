@@ -1,9 +1,0 @@
-<div class="card shadow-sm p-3">
-    <h5>Score History</h5>
-    <canvas id="entityChart" height="120"></canvas>
-
-    <script>
-        const chartData = {{ history | tojson }};
-        renderEntityChart(chartData);
-    </script>
-</div>

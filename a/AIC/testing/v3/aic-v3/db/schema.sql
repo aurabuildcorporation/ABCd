@@ -1,35 +1,15 @@
--- Entities table
-CREATE TABLE IF NOT EXISTS entities (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    type TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+DROP TABLE IF EXISTS scores;
 
--- Scores table
-CREATE TABLE IF NOT EXISTS scores (
+CREATE TABLE scores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     entity_name TEXT NOT NULL,
-    score REAL NOT NULL,
-    confidence REAL NOT NULL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- History table (optional extended tracking)
-CREATE TABLE IF NOT EXISTS history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    entity_name TEXT NOT NULL,
-    score REAL NOT NULL,
-    confidence REAL NOT NULL,
-    internal_signal REAL,
-    external_signal REAL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
--- Logs table
-CREATE TABLE IF NOT EXISTS logs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    level TEXT,
-    message TEXT,
+    aic_score INTEGER NOT NULL,
+    rating TEXT NOT NULL,
+    semantic_intelligence REAL,
+    cultural_momentum REAL,
+    external_credibility REAL,
+    sentiment_stability REAL,
+    system_confidence REAL,
+    confidence REAL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );

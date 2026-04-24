@@ -15,36 +15,37 @@ app.use(bodyParser.json());
 
 const PORT = process.env.NODE_ENGINE_PORT || 7000;
 
-app.post("/score", async (req, res) => {
-    const entity = req.body.entity;
+app.post('/score', async (req, res) => {
+  const { entity } = req.body;
 
-    if (!entity) {
-        return res.status(400).json({ error: "Missing entity" });
-    }
+  // TODO: plug in real logic; for now, stubbed example
+  const semanticIntelligence = 0.82;
+  const culturalMomentum = 0.74;
+  const externalCredibility = 0.69;
+  const sentimentStability = 0.61;
+  const systemConfidence = 0.9;
 
-    logger.info(`Scoring entity: ${entity}`);
+  const aicNorm =
+    0.35 * semanticIntelligence +
+    0.25 * culturalMomentum +
+    0.20 * externalCredibility +
+    0.10 * sentimentStability +
+    0.10 * systemConfidence;
 
-    try {
-        const sentimentScore = sentiment.analyze(entity);
-        const embeddingScore = embeddings.vectorScore(entity);
-        const heuristicScore = heuristics.apply(entity);
-        const volatilityScore = volatility.measure(entity);
-        const yelpData = await yelp.enrich(entity);
+  const confidence = systemConfidence; // meta-signal
 
-        const finalScore = fusion.combine({
-            sentiment: sentimentScore,
-            embedding: embeddingScore,
-            heuristic: heuristicScore,
-            volatility: volatilityScore,
-            yelp: yelpData
-        });
-
-        return res.json(finalScore);
-
-    } catch (err) {
-        logger.error(err.toString());
-        return res.status(500).json({ error: err.toString() });
-    }
+  res.json({
+    entity,
+    normalized_score: aicNorm, // 0–1
+    components: {
+      semantic_intelligence: semanticIntelligence,
+      cultural_momentum: culturalMomentum,
+      external_credibility: externalCredibility,
+      sentiment_stability: sentimentStability,
+      system_confidence: systemConfidence
+    },
+    confidence
+  });
 });
 
 app.listen(PORT, () => {

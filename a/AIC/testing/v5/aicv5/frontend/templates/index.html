@@ -1,0 +1,11 @@
+<!doctype html><html><body>
+<h1>AIC v5 Supreme</h1>
+<input id=e placeholder="Entity"><select id=t><option>brand</option><option>business</option></select>
+<button onclick="go()">Score</button>
+<pre id=o></pre>
+<script>
+async function go(){
+ let r=await fetch('/api/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({entity:e.value,type:t.value})});
+ o.textContent=JSON.stringify(await r.json(),null,2);
+}
+</script></body></html>
