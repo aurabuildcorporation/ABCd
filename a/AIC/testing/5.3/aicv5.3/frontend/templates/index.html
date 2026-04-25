@@ -1,0 +1,25 @@
+
+<!DOCTYPE html>
+<html>
+<head><title>AICv5</title></head>
+<body>
+<h1>AICv5 Dashboard</h1>
+<input id="q" placeholder="entity"/>
+<button onclick="run()">Score</button>
+<pre id="out"></pre>
+
+<script>
+async function run(){
+  const res = await fetch("/api/score", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      query:{text: document.getElementById("q").value, type:"business", mode:"deep"}
+    })
+  });
+
+  document.getElementById("out").innerText = await res.text();
+}
+</script>
+</body>
+</html>
