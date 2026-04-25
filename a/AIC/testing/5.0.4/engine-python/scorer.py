@@ -1,51 +1,62 @@
 import math
 
-def clamp(value, min_v, max_v):
-    return max(min_v, min(max_v, value))
+# Unified weights (tunable later)
+WEIGHTS = {
+    "authority": 0.35,
+    "sentiment": 0.25,
+    "popularity": 0.15,
+    "momentum": 0.15,
+    "trust": 0.10
+}
+
+def normalize(x):
+    """
+    Log normalization prevents explosion and caps without hard limits
+    """
+    return math.log(1 + max(0, x))
+
+
+def scale_to_1000(value, max_expected=10):
+    """
+    Converts normalized value into 0–1000 range
+    """
+    return 1000 * (value / (1 + max_expected))
+
 
 def score_entity(entity, signals):
 
-    authority = clamp(signals["authority"], 0, 200)
-    base = clamp(signals["base"], 0, 200)
+    # 1. normalize signals
+    a = normalize(signals.get("authority", 0))
+    s = normalize(signals.get("sentiment", 0))
+    p = normalize(signals.get("popularity", 0))
+    m = normalize(signals.get("momentum", 0))
+    t = normalize(signals.get("trust", 0))
 
-    sentiment = clamp(signals["sentiment"], -100, 150)
-    sentiment_normalized = (sentiment + 100) * 0.6  # 0–150 scale
-
-    popularity = clamp(signals["popularity"], 0, 150)
-    momentum = clamp(signals["momentum"], 0, 150)
-    trust = clamp(signals["trust"], 0, 150)
-
-    total = (
-        authority +
-        base +
-        sentiment_normalized +
-        popularity +
-        momentum +
-        trust
+    # 2. weighted sum
+    raw_score = (
+        WEIGHTS["authority"] * a +
+        WEIGHTS["sentiment"] * s +
+        WEIGHTS["popularity"] * p +
+        WEIGHTS["momentum"] * m +
+        WEIGHTS["trust"] * t
     )
 
-    score = round(clamp(total, 0, 1000), 2)
+    # 3. scale to 0–1000
+    final_score = scale_to_1000(raw_score)
+
+    # 4. grade mapping
+    if final_score >= 800:
+        grade = "A"
+    elif final_score >= 650:
+        grade = "B"
+    elif final_score >= 500:
+        grade = "C"
+    else:
+        grade = "D"
 
     return {
         "entity": entity,
-        "score": score,
-        "grade": grade(score),
-        "signals": {
-            "authority": authority,
-            "base": base,
-            "sentiment": sentiment_normalized,
-            "popularity": popularity,
-            "momentum": momentum,
-            "trust": trust
-        }
+        "score": round(final_score, 2),
+        "grade": grade,
+        "signals": signals
     }
-
-
-def grade(score):
-    if score >= 950: return "S+"
-    if score >= 900: return "S"
-    if score >= 850: return "A+"
-    if score >= 800: return "A"
-    if score >= 700: return "B"
-    if score >= 600: return "C"
-    return "D"

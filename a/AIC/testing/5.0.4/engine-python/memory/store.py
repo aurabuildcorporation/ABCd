@@ -3,6 +3,7 @@ import os
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "../database/aic_memory.db")
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -11,12 +12,13 @@ def init_db():
     CREATE TABLE IF NOT EXISTS entity_scores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         entity TEXT,
-        score INTEGER,
-        authority INTEGER,
-        sentiment INTEGER,
-        popularity INTEGER,
-        momentum INTEGER,
-        trust INTEGER,
+        score REAL,
+        authority REAL,
+        sentiment REAL,
+        popularity REAL,
+        momentum REAL,
+        trust REAL,
+        model_version TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
@@ -25,23 +27,26 @@ def init_db():
     conn.close()
 
 
-def save_score(entity, score_data):
+def save_score(entity, result):
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
+    signals = result["signals"]
+
     c.execute("""
         INSERT INTO entity_scores
-        (entity, score, authority, sentiment, popularity, momentum, trust)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (entity, score, authority, sentiment, popularity, momentum, trust, model_version)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         entity,
-        score_data["score"],
-        score_data["signals"]["authority"],
-        score_data["signals"]["sentiment"],
-        score_data["signals"]["popularity"],
-        score_data["signals"]["momentum"],
-        score_data["signals"]["trust"]
+        result["score"],
+        signals.get("authority", 0),
+        signals.get("sentiment", 0),
+        signals.get("popularity", 0),
+        signals.get("momentum", 0),
+        signals.get("trust", 0),
+        "v1.6"
     ))
 
     conn.commit()

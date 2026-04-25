@@ -1,24 +1,39 @@
 import requests
+import math
 
 def get_wikipedia_signals(entity):
 
-    url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{entity}"
-
     try:
-        res = requests.get(url)
+        url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{entity}"
+        res = requests.get(url, timeout=5)
         data = res.json()
 
-        if "title" not in data:
-            return {"authority": 20}
+        extract = data.get("extract", "")
+        title = data.get("title", "")
 
-        desc_length = len(data.get("extract", ""))
+        if not extract:
+            return {
+                "authority": 0,
+                "has_page": False,
+                "quality": 0
+            }
 
-        authority = min(200, 50 + (desc_length / 5))
+        length = len(extract)
+        words = len(extract.split())
+
+        # log-scaled authority (prevents inflation)
+        authority = math.log(1 + length) * math.log(1 + words)
 
         return {
-            "authority": round(authority, 2),
-            "has_page": True
+            "authority": authority,
+            "has_page": True,
+            "quality": 1,
+            "source": "wikipedia"
         }
 
     except:
-        return {"authority": 10, "has_page": False}
+        return {
+            "authority": 0,
+            "has_page": False,
+            "quality": 0
+        }

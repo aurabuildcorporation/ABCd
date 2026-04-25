@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from scorer import score_entity
 from collector import collect_all_signals
 from memory.store import init_db, save_score
-from memory.trends import calculate_trend
-from memory.trends import get_entity_history, calculate_trend
+from memory.trends import calculate_trend, get_entity_history
 
 app = Flask(__name__)
 

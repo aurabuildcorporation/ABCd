@@ -1,0 +1,21 @@
+#!/bin/bash
+
+check() {
+  if kill -0 $1 2>/dev/null; then
+    echo "$2: RUNNING"
+  else
+    echo "$2: STOPPED"
+  fi
+}
+
+if [ -f aic-runtime/pids/node.pid ]; then
+  check $(cat aic-runtime/pids/node.pid) "Node API"
+fi
+
+if [ -f aic-runtime/pids/python.pid ]; then
+  check $(cat aic-runtime/pids/python.pid) "Python Engine"
+fi
+
+if [ -f aic-runtime/pids/angular.pid ]; then
+  check $(cat aic-runtime/pids/angular.pid) "Angular UI"
+fiy

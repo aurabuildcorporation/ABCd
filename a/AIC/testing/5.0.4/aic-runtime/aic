@@ -1,0 +1,33 @@
+#!/bin/bash
+
+COMMAND=$1
+ARG=$2
+
+case "$COMMAND" in
+
+  start)
+    bash commands/start.sh
+    ;;
+
+  stop)
+    bash commands/stop.sh
+    ;;
+
+  status)
+    bash commands/status.sh
+    ;;
+
+  score)
+    bash commands/score.sh "$ARG"
+    ;;
+
+  *)
+    echo "AIC CLI"
+    echo "Usage:"
+    echo "  aic start"
+    echo "  aic stop"
+    echo "  aic status"
+    echo "  aic score <entity>"
+    ;;
+
+esac

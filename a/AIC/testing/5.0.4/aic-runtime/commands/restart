@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Restarting AIC SYSTEM..."
+
+bash aic stop
+sleep 2
+bash aic start
+
+echo "Restart complete."

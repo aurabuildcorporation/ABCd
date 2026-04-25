@@ -1,0 +1,28 @@
+#!/bin/bash
+
+source config.sh
+
+mkdir -p aic-runtime/pids
+mkdir -p aic-runtime/logs
+
+echo "Starting AIC PROCESS MANAGER V2..."
+
+# NODE
+cd $NODE_DIR
+nohup $NODE_CMD > ../aic-runtime/logs/node.log 2>&1 &
+echo $! > ../aic-runtime/pids/node.pid
+cd -
+
+# PYTHON
+cd $PY_DIR
+nohup $PY_CMD > ../aic-runtime/logs/python.log 2>&1 &
+echo $! > ../aic-runtime/pids/python.pid
+cd -
+
+# ANGULAR
+cd $NG_DIR
+nohup $NG_CMD > ../aic-runtime/logs/angular.log 2>&1 &
+echo $! > ../aic-runtime/pids/angular.pid
+cd -
+
+echo "AIC SYSTEM STARTED"

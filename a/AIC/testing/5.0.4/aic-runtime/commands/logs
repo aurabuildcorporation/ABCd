@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SERVICE=$1
+
+if [ -z "$SERVICE" ]; then
+  echo "Usage: aic logs node|python|angular"
+  exit 1
+fi
+
+tail -f aic-runtime/logs/$SERVICE.log
