@@ -46,7 +46,7 @@ def save_score(entity, result):
         signals.get("popularity", 0),
         signals.get("momentum", 0),
         signals.get("trust", 0),
-        "v1.6"
+        "v1.7"
     ))
 
     conn.commit()

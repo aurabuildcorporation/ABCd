@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "frontend-angular": {
+    "aic-dashboard": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/frontend-angular",
+            "outputPath": "dist/aic-dashboard",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -59,10 +59,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "frontend-angular:build:production"
+              "buildTarget": "aic-dashboard:build:production"
             },
             "development": {
-              "buildTarget": "frontend-angular:build:development"
+              "buildTarget": "aic-dashboard:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -94,6 +94,6 @@
     }
   },
   "cli": {
-    "analytics": "69620b10-d9a5-41ee-a18c-7475690d3c16"
+    "analytics": "260c93b8-cc7c-42d8-9707-caa85ba97b9b"
   }
 }

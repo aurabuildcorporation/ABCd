@@ -2,9 +2,9 @@
 
 echo "Stopping AIC SYSTEM..."
 
-kill $(cat aic-runtime/pids/node.pid) 2>/dev/null
-kill $(cat aic-runtime/pids/python.pid) 2>/dev/null
-kill $(cat aic-runtime/pids/angular.pid) 2>/dev/null
+kill $(cat ~/aic-runtime/pids/node.pid) 2>/dev/null
+kill $(cat ~/aic-runtime/pids/python.pid) 2>/dev/null
+kill $(cat ~/aic-runtime/pids/angular.pid) 2>/dev/null
 
 rm -f aic-runtime/pids/*.pid
 

@@ -1,33 +1,56 @@
 #!/bin/bash
 
-COMMAND=$1
-ARG=$2
+# =====================================================
+# AIC CLI v5.0.4
+# Global executable: /usr/local/bin/aic
+# =====================================================
+
+BASE_DIR="/home/userland/ABCd/a/AIC/testing/5.0.4/aic-cli"
+
+COMMAND="$1"
+shift
 
 case "$COMMAND" in
 
   start)
-    bash commands/start.sh
+    bash "$BASE_DIR/commands/start.sh"
     ;;
 
   stop)
-    bash commands/stop.sh
+    bash "$BASE_DIR/commands/stop.sh"
     ;;
 
   status)
-    bash commands/status.sh
+    bash "$BASE_DIR/commands/status.sh"
     ;;
 
   score)
-    bash commands/score.sh "$ARG"
+    if [ -z "$1" ]; then
+        echo "❌ Missing entity"
+        echo "Usage: aic score <entity>"
+        exit 1
+    fi
+
+    bash "$BASE_DIR/commands/CZECHscore.sh" "$*"
     ;;
 
-  *)
+  help|-h|--help|"")
     echo "AIC CLI"
     echo "Usage:"
     echo "  aic start"
     echo "  aic stop"
     echo "  aic status"
     echo "  aic score <entity>"
+    echo ""
+    echo "Examples:"
+    echo "  aic score Apple"
+    echo "  aic score \"Tesla Inc\""
+    ;;
+
+  *)
+    echo "❌ Unknown command: $COMMAND"
+    echo "Run: aic help"
+    exit 1
     ;;
 
 esac

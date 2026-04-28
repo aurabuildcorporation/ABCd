@@ -1,31 +1,27 @@
 import requests
+import math
+from urllib.parse import quote
 
 def get_news_signals(entity):
-
     try:
-        url = f"https://news.google.com/rss/search?q={entity}"
+        url = f"https://news.google.com/rss/search?q={quote(entity)}"
         res = requests.get(url, timeout=5)
-
         text = res.text.lower()
 
         mentions = text.count(entity.lower())
 
-        # log-based normalization (prevents saturation)
-        import math
-
-        frequency_score = math.log(1 + mentions)
+        popularity = 10 + (math.log(1 + mentions) * 12)
+        trust = min(100, 25 + mentions)
 
         return {
-            "frequency": frequency_score,
-            "raw_mentions": mentions,
-            "source": "news",
-            "trust_signal": 1 if mentions > 0 else 0
+            "popularity": round(popularity, 2),
+            "trust": round(trust, 2),
+            "news_mentions": mentions
         }
 
     except:
         return {
-            "frequency": 0,
-            "raw_mentions": 0,
-            "source": "news",
-            "trust_signal": 0
+            "popularity": 8.0,
+            "trust": 15.0,
+            "news_mentions": 0
         }

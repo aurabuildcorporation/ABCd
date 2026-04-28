@@ -1,45 +1,44 @@
 import requests
+from urllib.parse import quote
 
-POSITIVE = {"good", "great", "bullish", "growth", "win", "profit", "success"}
-NEGATIVE = {"bad", "crash", "loss", "hack", "lawsuit", "decline", "fraud"}
+POS = {"good","great","bullish","growth","win","profit","strong"}
+NEG = {"bad","crash","loss","fraud","lawsuit","weak"}
 
 def get_reddit_signals(entity):
-
     try:
-        url = f"https://www.reddit.com/search.json?q={entity}&limit=25"
-        headers = {"User-agent": "AIC-SCORE-V2"}
+        url = f"https://www.reddit.com/search.json?q={quote(entity)}&limit=25"
+        headers = {"User-agent": "AIC-SCORE-V17"}
 
         res = requests.get(url, headers=headers, timeout=5)
         data = res.json()
 
         posts = data["data"]["children"]
 
-        sentiment_score = 0
-        relevance_score = 0
+        mentions = len(posts)
+        score = 0
 
         for p in posts:
             text = p["data"]["title"].lower()
-            relevance_score += 1  # every mention counts lightly
 
-            if any(w in text for w in POSITIVE):
-                sentiment_score += 2
-            elif any(w in text for w in NEGATIVE):
-                sentiment_score -= 2
+            if any(w in text for w in POS):
+                score += 2
+            elif any(w in text for w in NEG):
+                score -= 2
             else:
-                sentiment_score += 0.5
+                score += 0.5
 
-        # normalize internally (NO HARD CAPS)
+        sentiment = score * 5
+        momentum = min(100, mentions * 3)
+
         return {
-            "sentiment": sentiment_score,
-            "relevance": relevance_score,
-            "source": "reddit",
-            "confidence": min(1.0, relevance_score / 25)
+            "sentiment": round(sentiment, 2),
+            "momentum": round(momentum, 2),
+            "reddit_mentions": mentions
         }
 
     except:
         return {
-            "sentiment": 0,
-            "relevance": 0,
-            "source": "reddit",
-            "confidence": 0.1
+            "sentiment": 0.0,
+            "momentum": 5.0,
+            "reddit_mentions": 0
         }

@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
+from memory.rankings import leaderboard, compare, top_movers, percentile
 from scorer import score_entity
 from collector import collect_all_signals
 from memory.store import init_db, save_score
@@ -44,6 +44,28 @@ def history(entity):
         "entity": entity,
         "history": data,
         "trend": trend
+    })
+
+@app.route('/leaderboard')
+def leaders():
+    return jsonify(leaderboard())
+
+
+@app.route('/compare/<a>/<b>')
+def compare_entities(a, b):
+    return jsonify(compare(a, b))
+
+
+@app.route('/top-movers')
+def movers():
+    return jsonify(top_movers())
+
+
+@app.route('/percentile/<entity>')
+def entity_percentile(entity):
+    return jsonify({
+        "entity": entity,
+        "percentile": percentile(entity)
     })
 
 app.run(port=5000)
