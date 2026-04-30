@@ -1,9 +1,11 @@
 #!/bin/bash
 
 # =====================================================
-# UTIL_GIT_PRO v2 - Interactive Git Automation Tool
+# UTIL_GIT_PRO v2.0.1 - Interactive Git Automation Tool
 # =====================================================
-
+# user/pass cred store
+# git config --global credential.helper "cache --timeout=86400"
+#
 # -----------------------------
 # CONFIG
 # -----------------------------
