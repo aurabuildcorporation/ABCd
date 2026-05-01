@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AEOS Admin Console</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+<div class="grid grid-cols-3 gap-4 p-4">
+
+    <!-- LIVE ENTITIES -->
+    <div class="col-span-1 bg-gray-800 p-4 rounded-xl">
+        <h2 class="text-lg font-bold">Live Entities</h2>
+        <div id="entityBox"></div>
+    </div>
+
+    <!-- SCORE CHART -->
+    <div class="col-span-2 bg-gray-800 p-4 rounded-xl">
+        <h2 class="text-lg font-bold">AIC Score Trends</h2>
+        <canvas id="chart"></canvas>
+    </div>
+
+</div>
+
+<script>
+const socket = new WebSocket("ws://127.0.0.1:8000/ws/admin");
+
+// Chart setup
+let chartData = {
+    labels: [],
+    datasets: [{
+        label: "Score",
+        data: [],
+        borderColor: "cyan",
+        tension: 0.3
+    }]
+};
+
+let chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: chartData
+});
+
+socket.onopen = () => {
+    console.log("WebSocket connected");
+};
+
+socket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    console.log("WS DATA:", msg);
+
+    if (msg.type !== "STATE_SNAPSHOT") return;
+
+    const entities = msg.data;
+
+    const box = document.getElementById("entityBox");
+    box.innerHTML = "";
+
+    chart.data.labels = [];
+    chart.data.datasets[0].data = [];
+
+    for (let k in entities) {
+        const e = entities[k];
+
+        box.innerHTML += `
+            <div class="p-2 bg-gray-700 rounded mt-2">
+                <b>${k}</b><br/>
+                Score: ${e.score}<br/>
+                Tier: ${e.tier}<br/>
+                Limit: ${e.credit_limit}
+            </div>
+        `;
+
+        chart.data.labels.push(k);
+        chart.data.datasets[0].data.push(e.score);
+    }
+
+    chart.update();
+};
+
+socket.onerror = (err) => {
+    console.error("WebSocket error:", err);
+};
+
+socket.onclose = () => {
+    console.warn("WebSocket closed");
+};
+</script>
+
+</body>
+</html>
