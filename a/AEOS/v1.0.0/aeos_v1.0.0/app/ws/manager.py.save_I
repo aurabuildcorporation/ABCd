@@ -1,3 +1,4 @@
+GNU nano 6.2                                            app/wa
 import asyncio
 import json
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -26,4 +27,15 @@ class ConnectionManager:
 # Instantiate the manager so it can be imported
 manager = ConnectionManager()
 
-
+@router.websocket("/ws/admin")
+async def admin_ws(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Keep connection alive and handle messages if needed
+            data = await websocket.receive_text()
+            # Example: echo back or process data
+            # await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await asyncio.sleep(0.1)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)

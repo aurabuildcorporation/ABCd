@@ -5,7 +5,6 @@ from app.core.reducer import get_current_state
 from app.db.sqlite import get_db
 from fastapi import WebSocket, WebSocketDisconnect
 
-
 router = APIRouter()
 
 # ---------------------------
@@ -33,14 +32,20 @@ def admin_events():
 
 
 # ---------------------------
-# WebSocket: Live Stream (FIXED)
+# WebSocket: Live Stream 
 # ---------------------------
 
 @router.websocket("/ws/admin")
 async def admin_ws(websocket: WebSocket):
     await manager.connect(websocket)
+
     try:
         while True:
-            await websocket.receive()  # keeps connection alive
+            await websocket.receive_text()  # or receive_json()
+
     except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+    except Exception as e:
+        print("WebSocket error:", e)
         manager.disconnect(websocket)
