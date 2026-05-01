@@ -5,7 +5,5 @@ router = APIRouter()
 
 @router.post("/aic/event")
 async def aic_event(event: dict):
-
     state = await handle_aic_event(event)
-
     return {"status": "accepted", "state": state}

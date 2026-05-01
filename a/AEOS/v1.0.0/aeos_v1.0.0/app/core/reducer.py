@@ -1,34 +1,40 @@
-from typing import Dict, Any, List
-from app.db.event_store import fetch_events
+# app/core/reducer.py
+
+from app.db.event_store import get_events
+from app.core.state import ENTITY_STATE
 
 
-def reduce_entity_state(events: List[tuple]) -> Dict[str, Any]:
+def reduce_events(events):
     state = {}
 
-    for row in events:
-        (
-            _id,
-            entity,
-            event_type,
-            score,
-            grade,
-            tier,
-            credit_limit,
-            raw,
-            timestamp
-        ) = row
+    for e in events:
+        entity = e["entity"]
 
-        state[entity] = {
-            "score": score,
-            "grade": grade,
-            "tier": tier,
-            "credit_limit": credit_limit,
-            "last_updated": timestamp
-        }
+        if entity not in state:
+            state[entity] = {
+                "score": 0,
+                "tier": "T0",
+                "credit_limit": 0,
+                "last_event": None
+            }
+
+        if e["event"] == "AIC_SCORE_UPDATED":
+            score = float(e.get("score", 0))
+
+            state[entity]["score"] = score
+            state[entity]["last_event"] = e
+
+            # simple tier logic
+            if score <= 300:
+                state[entity]["tier"] = "T3"
+            elif score <= 500:
+                state[entity]["tier"] = "T2"
+            else:
+                state[entity]["tier"] = "T1"
 
     return state
 
 
 def get_current_state(entity: str = None):
-    events = fetch_events(entity)
-    return reduce_entity_state(events)	
+    events = get_events(entity)
+    return reduce_events(events)

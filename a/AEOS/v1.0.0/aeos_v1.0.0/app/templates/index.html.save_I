@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AEOS Admin Console</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+<div class="grid grid-cols-3 gap-4 p-4">
+
+    <!-- LIVE ENTITIES -->
+    <div class="col-span-1 bg-gray-800 p-4 rounded-xl">
+        <h2 class="text-lg font-bold mb-2">Live Entities</h2>
+        <div id="entityBox"></div>
+    </div>
+
+    <!-- EVENT STREAM -->
+    <div class="col-span-1 bg-gray-800 p-4 rounded-xl overflow-y-auto h-[600px]">
+        <h2 class="text-lg font-bold mb-2">Event Stream</h2>
+        <div id="eventBox" class="text-xs"></div>
+    </div>
+
+    <!-- SCORE CHART -->
+    <div class="col-span-1 bg-gray-800 p-4 rounded-xl">
+        <h2 class="text-lg font-bold mb-2">AIC Score Trends</h2>
+        <canvas id="chart"></canvas>
+    </div>
+
+</div>
+
+<script>
+const socket = new WebSocket("ws://127.0.0.1:8000/ws/admin");
+
+// STATE STORE (IMPORTANT)
+const entityState = {};
+const eventLog = [];
+
+// CHART
+let chart = new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+        labels: [],
+        datasets: [{
+            label: "Score",
+            data: [],
+            borderColor: "cyan",
+            tension: 0.3
+        }]
+    }
+});
+
+// ----------------------
+// RENDER FUNCTIONS
+// ----------------------
+
+function renderEntities() {
+    const box = document.getElementById("entityBox");
+    box.innerHTML = "";
+
+    for (let key in entityState) {
+        const e = entityState[key];
+
+        box.innerHTML += `
+            <div class="p-2 bg-gray-700 rounded mt-2">
+                <b>${key}</b><br/>
+                Score: ${e.score}<br/>
+                Tier: ${e.tier}<br/>
+                Limit: ${e.credit_limit}
+            </div>
+        `;
+    }
+}
+
+function renderEvents() {
+    const box = document.getElementById("eventBox");
+
+    box.innerHTML = eventLog.slice(-50).map(e => `
+        <div class="border-b border-gray-700 py-1">
+            <span class="text-green-400">${e.entity}</span>
+            → ${e.score}
+            <span class="text-gray-400">(${e.timestamp})</span>
+        </div>
+    `).join("");
+}
+
+function updateChart() {
+    chart.data.labels = Object.keys(entityState);
+    chart.data.datasets[0].data = Object.values(entityState).map(e => e.score);
+    chart.update();
+}
+
+// ----------------------
+// WEBSOCKET
+// ----------------------
+
+socket.onopen = () => {
+    console.log("WebSocket connected");
+};
+
+socket.onmessage = (event) => {
+    const msg = JSON.parse(event.data);
+    console.log("WS:", msg);
+
+    // ----------------------
+    // FULL STATE SNAPSHOT
+    // ----------------------
+    if (msg.type === "STATE_SNAPSHOT") {
+        const data = msg.data;
+
+        for (let k in data) {
+            entityState[k] = data[k];
+        }
+
+        renderEntities();
+        updateChart();
+    }
+
+    // ----------------------
+    // EVENT STREAM (NEW)
+    // ----------------------
+    if (msg.type === "EVENT_APPEND") {
+        eventLog.push(msg.data);
+
+        const e = msg.data;
+
+        // update state incrementally
+        entityState[e.entity] = {
+            score: e.score,
+            tier: e.grade,
+            credit_limit: 0
+        };
+
+        renderEntities();
+        renderEvents();
+        updateChart();
+    }
+};
+
+socket.onerror = (err) => console.error("WS error", err);
+socket.onclose = () => console.warn("WS closed");
+</script>
+
+</body>
+</html>

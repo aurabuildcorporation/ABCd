@@ -9,7 +9,6 @@ import logging
 from app.api.routes_admin import router as admin_router
 from app.api import routes_ledger, routes_pi, routes_ae, routes_balance, routes_aic_events
 from app.db.init_db import init_db
-from app.db.event_store import init_event_store
 
 logger = logging.getLogger("aeos")
 
@@ -19,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 async def lifespan(app: FastAPI):
     logger.info("AEOS starting...")
     init_db()
-    init_event_store()
+
     yield
     logger.info("AEOS shutting down...")
 

@@ -1,6 +1,8 @@
-# app/ws/manager.py
+import asyncio
+import json
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from fastapi import WebSocket
+router = APIRouter()
 
 class ConnectionManager:
     def __init__(self):
@@ -14,21 +16,25 @@ class ConnectionManager:
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
 
-    async def send(self, websocket: WebSocket, message: dict):
-        await websocket.send_json(message)
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
 
     async def broadcast(self, message: dict):
-        dead = []
+        for connection in self.active_connections:
+            await connection.send_json(message)
 
-        for conn in self.active_connections:
-            try:
-                await conn.send_json(message)
-            except Exception:
-                dead.append(conn)
-
-        # cleanup dead sockets
-        for d in dead:
-            self.disconnect(d)
-
-
+# Instantiate the manager so it can be imported
 manager = ConnectionManager()
+
+@router.websocket("/ws/admin")
+async def admin_ws(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Keep connection alive and handle messages if needed
+            data = await websocket.receive_text()
+            # Example: echo back or process data
+            # await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await asyncio.sleep(0.1) 
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
