@@ -1,137 +1,202 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AIC Dashboard</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-white text-gray-900">  <!-- Header -->  <header class="bg-red-600 text-white p-4 shadow-lg">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <h1 class="text-2xl font-bold tracking-wide">AIC Admin Dashboard</h1>
-      <span id="status" class="text-sm bg-white text-red-600 px-3 py-1 rounded-full">LIVE</span>
-    </div>
-  </header>  <!-- Main Layout -->  <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6"><!-- Left: Chart -->
-<section class="lg:col-span-2 bg-white rounded-2xl shadow p-6 border border-red-100">
-  <h2 class="text-lg font-semibold mb-4 text-red-600">AIC Score Over Time</h2>
-  <canvas id="lineChart"></canvas>
-</section>
 
-<!-- Right: Stats -->
-<section class="bg-white rounded-2xl shadow p-6 border border-red-100">
-  <h2 class="text-lg font-semibold mb-4 text-red-600">Entity Stats</h2>
-  <div id="entityList" class="space-y-3"></div>
-</section>
+<body class="bg-white text-gray-900">
 
-<!-- Bottom: Grid -->
-<section class="lg:col-span-3 bg-white rounded-2xl shadow p-6 border border-red-100">
-  <h2 class="text-lg font-semibold mb-4 text-red-600">Recent Events</h2>
-  <div class="overflow-x-auto">
-    <table class="w-full text-left">
-      <thead>
-        <tr class="border-b text-red-600">
-          <th class="p-2">Time</th>
-          <th class="p-2">Entity</th>
-          <th class="p-2">Event</th>
-          <th class="p-2">Tier</th>
-        </tr>
-      </thead>
-      <tbody id="eventsTable"></tbody>
-    </table>
+<!-- HEADER -->
+<header class="bg-red-600 text-white p-4 shadow-lg">
+  <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <h1 class="text-2xl font-bold tracking-wide">AIC Admin Dashboard</h1>
+    <span class="text-sm bg-white text-red-600 px-3 py-1 rounded-full">LIVE</span>
   </div>
-</section>
+</header>
 
-  </main>  <script>
-    const ctx = document.getElementById('lineChart').getContext('2d');
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-    const chartData = {
-      labels: [],
-      datasets: [{
-        label: 'AIC Score',
-        data: [],
-        borderColor: '#dc2626',
-        backgroundColor: 'rgba(220,38,38,0.1)',
-        tension: 0.3
-      }]
-    };
+  <!-- CHART -->
+  <section class="lg:col-span-2 bg-white rounded-2xl shadow p-6 border border-red-100">
+    <h2 class="text-lg font-semibold mb-4 text-red-600">AIC Score Over Time</h2>
+    <canvas id="lineChart"></canvas>
+  </section>
 
-    const lineChart = new Chart(ctx, {
-      type: 'line',
-      data: chartData,
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: true }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
+  <!-- ENTITY STATS -->
+  <section class="bg-white rounded-2xl shadow p-6 border border-red-100">
+    <h2 class="text-lg font-semibold mb-4 text-red-600">Entity Stats</h2>
+    <div id="entityList" class="space-y-3"></div>
+  </section>
 
-    const entityList = document.getElementById('entityList');
-    const eventsTable = document.getElementById('eventsTable');
+  <!-- EVENTS -->
+  <section class="lg:col-span-3 bg-white rounded-2xl shadow p-6 border border-red-100">
+    <h2 class="text-lg font-semibold mb-4 text-red-600">Recent Events</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b text-red-600">
+            <th class="p-2">Time</th>
+            <th class="p-2">Entity</th>
+            <th class="p-2">Event</th>
+            <th class="p-2">Tier</th>
+          </tr>
+        </thead>
+        <tbody id="eventsTable"></tbody>
+      </table>
+    </div>
+  </section>
 
-    const entities = {};
+</main>
 
-    function updateEntity(entity, tier) {
-      entities[entity] = tier;
-      renderEntities();
+<script>
+/* ---------------------------
+   CHART SETUP
+---------------------------- */
+const ctx = document.getElementById('lineChart').getContext('2d');
+
+const chartData = {
+  labels: [],
+  datasets: [{
+    label: 'AIC Score',
+    data: [],
+    borderColor: '#dc2626',
+    backgroundColor: 'rgba(220,38,38,0.1)',
+    tension: 0.3
+  }]
+};
+
+const lineChart = new Chart(ctx, {
+  type: 'line',
+  data: chartData,
+  options: {
+    responsive: true,
+    animation: false,
+    scales: {
+      y: { beginAtZero: true }
     }
+  }
+});
 
-    function renderEntities() {
-      entityList.innerHTML = '';
-      Object.entries(entities).forEach(([entity, tier]) => {
-        const div = document.createElement('div');
-        div.className = 'flex justify-between p-3 bg-red-50 rounded-lg';
-        div.innerHTML = `<span>${entity}</span><span class="text-red-600 font-bold">${tier}</span>`;
-        entityList.appendChild(div);
-      });
-    }
+/* ---------------------------
+   STATE
+---------------------------- */
+const entityList = document.getElementById('entityList');
+const eventsTable = document.getElementById('eventsTable');
 
-    function addEvent(event) {
-      const row = document.createElement('tr');
-      row.className = 'border-b';
-      row.innerHTML = `
-        <td class="p-2">${new Date().toLocaleTimeString()}</td>
-        <td class="p-2">${event.entity}</td>
-        <td class="p-2">${event.event}</td>
-        <td class="p-2 text-red-600">${event.tier || '-'}</td>
-      `;
-      eventsTable.prepend(row);
-    }
+const entities = {};   // { "SpaceX": "T2" }
 
-    function updateChart(score) {
-      const time = new Date().toLocaleTimeString();
-      chartData.labels.push(time);
-      chartData.datasets[0].data.push(score);
+/* ---------------------------
+   ENTITY RENDER
+---------------------------- */
+function updateEntity(entity, tier) {
+  entities[entity] = tier;
+  renderEntities();
+}
 
-      if (chartData.labels.length > 20) {
-        chartData.labels.shift();
-        chartData.datasets[0].data.shift();
-      }
+function renderEntities() {
+  entityList.innerHTML = '';
 
-      lineChart.update();
-    }
+  Object.entries(entities).forEach(([entity, tier]) => {
+    const div = document.createElement('div');
+    div.className = 'flex justify-between p-3 bg-red-50 rounded-lg';
 
-    // WebSocket connection
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/admin");
+    div.innerHTML = `
+      <span>${entity}</span>
+      <span class="text-red-600 font-bold">${tier}</span>
+    `;
 
-    ws.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
+    entityList.appendChild(div);
+  });
+}
 
-      console.log("Incoming:", data);
+/* ---------------------------
+   EVENTS TABLE
+---------------------------- */
+function addEvent({ entity, tier, timestamp }) {
+  const row = document.createElement('tr');
+  row.className = 'border-b';
 
-      updateEntity(data.entity, data.tier || 'T?');
-      addEvent(data);
+  const time = timestamp
+    ? new Date(timestamp * 1000).toLocaleTimeString()
+    : new Date().toLocaleTimeString();
 
-      if (data.score !== undefined) {
-        updateChart(data.score);
-      }
-    };
+  row.innerHTML = `
+    <td class="p-2">${time}</td>
+    <td class="p-2">${entity}</td>
+    <td class="p-2">AIC_SCORE_UPDATED</td>
+    <td class="p-2 text-red-600">${tier}</td>
+  `;
 
-    ws.onopen = () => console.log("WebSocket connected");
-    ws.onclose = () => console.log("WebSocket disconnected");
+  // prepend (no full re-render)
+  eventsTable.insertBefore(row, eventsTable.firstChild);
 
-  </script></body>
+  // limit rows (performance)
+  if (eventsTable.children.length > 50) {
+    eventsTable.removeChild(eventsTable.lastChild);
+  }
+}
+
+/* ---------------------------
+   CHART UPDATE
+---------------------------- */
+function updateChart(score, timestamp) {
+  const time = timestamp
+    ? new Date(timestamp * 1000).toLocaleTimeString()
+    : new Date().toLocaleTimeString();
+
+  chartData.labels.push(time);
+  chartData.datasets[0].data.push(score);
+
+  if (chartData.labels.length > 20) {
+    chartData.labels.shift();
+    chartData.datasets[0].data.shift();
+  }
+
+  lineChart.update("none");
+}
+
+/* ---------------------------
+   WEBSOCKET
+---------------------------- */
+const ws = new WebSocket("ws://127.0.0.1:8000/ws/admin");
+
+ws.onmessage = (msg) => {
+  let data;
+
+  try {
+    data = JSON.parse(msg.data);
+  } catch (e) {
+    console.error("Invalid WS payload:", msg.data);
+    return;
+  }
+
+  // ✅ Only process clean events
+  if (data.type !== "EVENT") return;
+
+  const {
+    entity = "unknown",
+    score = 0,
+    tier = "-",
+    timestamp
+  } = data;
+
+  console.log("EVENT:", data);
+
+  updateEntity(entity, tier);
+  addEvent({ entity, tier, timestamp });
+  updateChart(score, timestamp);
+};
+
+ws.onopen = () => console.log("WebSocket connected");
+ws.onclose = () => console.log("WebSocket disconnected");
+
+</script>
+
+</body>
 </html>

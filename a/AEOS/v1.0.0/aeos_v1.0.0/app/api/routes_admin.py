@@ -38,14 +38,8 @@ def admin_events():
 @router.websocket("/ws/admin")
 async def admin_ws(websocket: WebSocket):
     await manager.connect(websocket)
-
     try:
         while True:
-            await websocket.receive_text()  # or receive_json()
-
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-    except Exception as e:
-        print("WebSocket error:", e)
+            await websocket.receive_text()  # keep alive only
+    except:
         manager.disconnect(websocket)

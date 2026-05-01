@@ -1,25 +1,23 @@
-from app.db.event_store import append_event
-from app.core.reducer import get_current_state
+from app.services.reducer import build_state
 from app.ws.manager import manager
-
 
 async def handle_aic_event(event: dict):
 
-    # 1. persist immutable event
-    append_event(event)
-
     entity = event["entity"]
+    score = float(event.get("score", 0))
 
-    # 2. compute new derived state
-    state = get_current_state(entity)
+    state = build_state(entity, score, event)
 
-    print(f"[AIC EVENT] {entity} → {state[entity]['tier']}")
+    print(f"[AIC EVENT] {entity} → {state['tier']} → Limit {state['credit_limit']}")
 
-    # 3. broadcast EVENT (not full snapshot)
+    # 🔥 SEND CLEAN EVENT (NOT NESTED)
     await manager.broadcast({
-        "type": "AIC_EVENT",
-        "event": event,
-        "state": state[entity]
+        "type": "EVENT",
+        "entity": entity,
+        "score": state["score"],
+        "tier": state["tier"],
+        "credit_limit": state["credit_limit"],
+        "timestamp": event.get("timestamp")
     })
 
-    return state[entity]
+    return state

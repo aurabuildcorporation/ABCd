@@ -1,8 +1,20 @@
 # app/core/reducer.py
-
 from app.db.event_store import get_events
 from app.core.state import ENTITY_STATE
 
+def build_state(entity, score, event):
+
+    tier = determine_tier(score)
+    credit_limit = map_credit(tier)
+
+    ENTITY_STATE[entity] = {
+        "score": score,
+        "tier": tier,
+        "credit_limit": credit_limit,
+        "last_event": event
+    }
+
+    return ENTITY_STATE[entity]
 
 def reduce_events(events):
     state = {}
